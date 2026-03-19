@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한컴타자 아이디 검색</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --bg-color: #f5f7fa;
+        }
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding-top: 50px;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: var(--primary-color);
+        }
+        button {
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #357abd;
+        }
+        #result {
+            text-align: left;
+            margin-top: 1rem;
+        }
+        .student-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary-color);
+            margin-bottom: 10px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .student-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .grade-tag {
+            font-size: 0.8rem;
+            background: #e1e8ed;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #555;
+        }
+        .info-row {
+            margin: 5px 0;
+            color: #444;
+        }
+        .label {
+            color: #888;
+            font-size: 0.9rem;
+            width: 70px;
+            display: inline-block;
+        }
+        .no-result {
+            color: #ff4d4f;
+            text-align: center;
+            padding: 20px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⌨️ 한컴타자 아이디 검색</h1>
+    <div class="search-box">
+        <input type="text" id="nameInput" placeholder="학생 이름을 입력하세요 (예: 박서준)" onkeypress="if(event.keyCode==13) searchStudent()">
+        <button onclick="searchStudent()">검색</button>
+    </div>
+    <div id="result"></div>
+</div>
+
+<script>
+    // 학생 데이터 리스트
+    const studentData = [
+        { name: "강서연", info: "", id: "111aaa_30" },
+        { name: "강소희", info: "", id: "333aaa_22" },
+        { name: "강지우", info: "", id: "333aaa_38" },
+        { name: "고다해", info: "", id: "222aaa_16" },
+        { name: "고한울", info: "", id: "111aaa_11" },
+        { name: "곽도윤", info: "", id: "222aaa_28" },
+        { name: "곽우현", info: "", id: "222aaa_09" },
+        { name: "권도엽", info: "", id: "222aaa_30" },
+        { name: "권도윤", info: "", id: "222aaa_36" },
+        { name: "권현서", info: "", id: "333aaa_26" },
+        { name: "권현진", info: "", id: "333aaa_23" },
+        { name: "김교현", info: "", id: "222aaa_29" },
+        { name: "김나윤", info: "", id: "111aaa_24" },
+        { name: "김단우", info: "", id: "333aaa_21" },
+        { name: "김도윤", info: "", id: "222aaa_37" },
+        { name: "김도훈", info: "", id: "111aaa_03" },
+        { name: "김라은", info: "", id: "222aaa_08" },
+        { name: "김리아", info: "", id: "111aaa_16" },
+        { name: "김민재", info: "", id: "222aaa_38" },
+        { name: "김민준", info: "", id: "333aaa_03" },
+        { name: "김서현", info: "", id: "111aaa_01" },
+        { name: "김수현", info: "", id: "333aaa_17" },
+        { name: "김아윤", info: "", id: "222aaa_03" },
+        { name: "김유찬", info: "", id: "222aaa_31" },
+        { name: "김이든", info: "", id: "111aaa_05" },
+        { name: "김주하", info: "", id: "111aaa_34" },
+        { name: "김지후", info: "", id: "333aaa_31" },
+        { name: "남시율", info: "", id: "111aaa_31" },
+        { name: "남하율", info: "", id: "333aaa_29" },
+        { name: "도건우", info: "", id: "222aaa_06" },
+        { name: "박규민", info: "", id: "222aaa_24" },
+        { name: "박서윤", info: "", id: "333aaa_16" },
+        { name: "박서준", info: "1학년", id: "111aaa_04" },
+        { name: "박서준", info: "2학년", id: "111aaa_12" },
+        { name: "박유진", info: "", id: "333aaa_37" },
+        { name: "박재민", info: "", id: "111aaa_07" },
+        { name: "박재이", info: "", id: "111aaa_18" },
+        { name: "박종원", info: "", id: "333aaa_08" },
+        { name: "박준우", info: "", id: "222aaa_05" },
+        { name: "박준혁", info: "", id: "222aaa_01" },
+        { name: "박지안", info: "", id: "111aaa_02" },
+        { name: "박지한", info: "", id: "111aaa_23" },
+        { name: "박지후", info: "", id: "111aaa_29" },
+        { name: "박진혁", info: "", id: "222aaa_02" },
+        { name: "박한솔", info: "", id: "111aaa_13" },
+        { name: "배우영", info: "", id: "333aaa_28" },
+        { name: "배주현", info: "", id: "111aaa_08" },
+        { name: "백수민", info: "", id: "111aaa_37" },
+        { name: "백시훈", info: "", id: "333aaa_30" },
+        { name: "석나연", info: "", id: "111aaa_20" },
+        { name: "성시윤", info: "", id: "111aaa_25" },
+        { name: "손시완", info: "", id: "222aaa_32" },
+        { name: "손호진", info: "", id: "111aaa_27" },
+        { name: "송서영", info: "", id: "333aaa_02" },
+        { name: "송시원", info: "", id: "333aaa_06" },
+        { name: "송재이", info: "", id: "333aaa_09" },
+        { name: "송지훈", info: "", id: "333aaa_15" },
+        { name: "신로아", info: "", id: "111aaa_38" },
+        { name: "신서연", info: "", id: "333aaa_14" },
+        { name: "신서호", info: "", id: "333aaa_13" },
+        { name: "신아린", info: "", id: "111aaa_35" },
+        { name: "신희영", info: "", id: "444aaa_03" },
+        { name: "안시우", info: "", id: "222aaa_15" },
+        { name: "안준우", info: "", id: "222aaa_27" },
+        { name: "양예섬", info: "", id: "222aaa_33" },
+        { name: "엄윤솔", info: "", id: "222aaa_17" },
+        { name: "여소담", info: "", id: "111aaa_19" },
+        { name: "우채민", info: "", id: "333aaa_11" },
+        { name: "유준성", info: "", id: "222aaa_20" },
+        { name: "육하준", info: "", id: "333aaa_04" },
+        { name: "윤동욱", info: "", id: "333aaa_12" },
+        { name: "은다현", info: "", id: "222aaa_35" },
+        { name: "이나윤", info: "", id: "222aaa_10" },
+        { name: "이서은", info: "", id: "111aaa_22" },
+        { name: "이수빈", info: "", id: "333aaa_18" },
+        { name: "이수아", info: "", id: "333aaa_19" },
+        { name: "이승우", info: "", id: "333aaa_24" },
+        { name: "이아린", info: "", id: "333aaa_20" },
+        { name: "이연준", info: "", id: "111aaa_39" },
+        { name: "이윤하", info: "", id: "333aaa_27" },
+        { name: "이윤호", info: "", id: "111aaa_09" },
+        { name: "이지율", info: "", id: "222aaa_25" },
+        { name: "이지한", info: "", id: "222aaa_18" },
+        { name: "이진우", info: "", id: "222aaa_07" },
+        { name: "이채린", info: "", id: "222aaa_26" },
+        { name: "이채명", info: "", id: "333aaa_25" },
+        { name: "이하나", info: "", id: "111aaa_28" },
+        { name: "이현우", info: "", id: "333aaa_33" },
+        { name: "이혜린", info: "", id: "333aaa_32" },
+        { name: "이호준", info: "", id: "222aaa_21" },
+        { name: "장다은", info: "", id: "333aaa_34" },
+        { name: "장우혁", info: "", id: "111aaa_26" },
+        { name: "정서윤", info: "", id: "111aaa_17" },
+        { name: "정연찬", info: "", id: "111aaa_14" },
+        { name: "정지원", info: "", id: "111aaa_36" },
+        { name: "조수빈", info: "", id: "333aaa_35" },
+        { name: "조은수", info: "", id: "111aaa_32" },
+        { name: "조은재", info: "", id: "444aaa_01" },
+        { name: "조이담", info: "", id: "333aaa_10" },
+        { name: "진세은", info: "", id: "111aaa_33" },
+        { name: "채정우", info: "", id: "222aaa_34" },
+        { name: "채현성", info: "", id: "111aaa_10" },
+        { name: "최서우", info: "", id: "333aaa_36" },
+        { name: "최시우", info: "", id: "222aaa_13" },
+        { name: "최시현", info: "", id: "222aaa_19" },
+        { name: "최예서", info: "", id: "222aaa_22" },
+        { name: "최원준", info: "", id: "333aaa_39" },
+        { name: "최은설", info: "", id: "333aaa_05" },
+        { name: "최은유", info: "", id: "333aaa_07" },
+        { name: "최정윤", info: "", id: "111aaa_21" },
+        { name: "하동현", info: "", id: "444aaa_02" },
+        { name: "한지우", info: "", id: "222aaa_39" },
+        { name: "허하율", info: "", id: "111aaa_06" },
+        { name: "현서원", info: "", id: "111aaa_15" },
+        { name: "황정원", info: "", id: "333aaa_01" }
+    ];
+
+    const COMMON_PW = "111aaa111";
+
+    function searchStudent() {
+        const query = document.getElementById('nameInput').value.trim();
+        const resultArea = document.getElementById('result');
+        
+        if (!query) {
+            alert("이름을 입력해주세요.");
+            return;
+        }
+
+        const filtered = studentData.filter(s => s.name === query);
+        
+        if (filtered.length > 0) {
+            let html = '';
+            filtered.forEach(student => {
+                html += `
+                    <div class="student-card">
+                        <div class="student-name">
+                            ${student.name} 
+                            ${student.info ? `<span class="grade-tag">${student.info}</span>` : ''}
+                        </div>
+                        <div class="info-row"><span class="label">아이디:</span> <strong>${student.id}</strong></div>
+                        <div class="info-row"><span class="label">비밀번호:</span> <strong>${COMMON_PW}</strong></div>
+                    </div>
+                `;
+            });
+            resultArea.innerHTML = html;
+        } else {
+            resultArea.innerHTML = `<div class="no-result">'${query}' 학생을 찾을 수 없습니다.</div>`;
+        }
+    }
+</script>
+
+</body>
+</html>
